@@ -123,6 +123,7 @@
     <button class="btn" id="fitBtn">适应窗口</button>
     <button class="btn" id="expandAll">展开全部</button>
     <button class="btn" id="collapseAll">折叠到二级</button>
+    <a class="btn" href="https://github.com/shiren23/thesis-topic-map/blob/main/%E5%81%87%E8%AE%BE%E4%B8%8E%E9%A3%8E%E9%99%A9%E7%99%BB%E8%AE%B0%E5%86%8C.md" target="_blank" rel="noopener">假设与风险登记册</a>
     <span class="hint">拖动平移 · 滚轮缩放 · 点圆点折叠分支 · 点卡片看详情</span>
   </div>
 </header>
@@ -277,6 +278,22 @@ const DATA = {
         { id:"o1", type:"open", label:"是否保留“可靠性”章节", desc:"对应决策一中的 C 方向，是否作为 B2 的最后一章。" },
         { id:"o2", type:"open", label:"需确认的约束", desc:"算力 / 本源真机、可支配时间、导师对“量子创新”的要求强度。" },
         { id:"o3", type:"open", label:"数据集扩充清单", desc:"Concrete / Energy / Yacht 等公开表格回归集的具体选择。" }
+      ] },
+    { id:"r", type:"risk", label:"七、假设与风险（四象限）", sub:"已知/未知 × 已知/未知",
+      desc:"用四象限复盘：哪些是已知的已知、明知未知、手里有却没用的知识、以及完全没意识到的盲点。完整版见仓库 docs/假设与风险登记册.md。",
+      children:[
+        { id:"r1", type:"fact", label:"① 已知的已知", sub:"事实 + 已锁定决策",
+          desc:"赛场约束与优秀答案结果（5187/4559 → 4344/3976）；数据事实（保险偏度 1.51/双峰，communities 122 维/偏度 1.52）；工具与代码骨架已就绪；文献锚点；已定决策（B2 / 双轨·精简）。" },
+        { id:"r2", type:"open", label:"② 已知的未知", sub:"明知未知 · 待实验",
+          desc:"机理归属 H1/H2/H3、方法迁移性、量子门控能否替代分桶、边界临界点、差异显著性、长尾 vs smoker 归因、122 维降维、导师要求与算力时间。",
+          cons:["需逐个用实验或沟通消解"] },
+        { id:"r3", type:"risk", label:"③ 未知的已知 ★", sub:"手里有知识却没用到",
+          desc:"最重要：优秀答案的“分桶”测试时用真实 charges 路由 = oracle gating，4344 是可部署不可达的乐观上限；保险数据疑似本身为仿真数据；无优秀答案真代码（仅 PDF 复原）；示例选题暗含实验室审美；“过程>创新”是隐式判据；一批未言明假设。",
+          pros:["已在手边，意识到即可转化为研究优势"],
+          cons:["不意识到，就会误把 oracle 上限当可实现目标"] },
+        { id:"r4", type:"risk", label:"④ 未知的未知", sub:"盲点 · 不可预见",
+          desc:"“长尾”框架可能整体塌缩（实为二簇/条件问题）；头部噪声主导使结论不稳；量子侧真凶未必是长尾（barren plateau/编码饱和/shot noise）；评审质疑与撞车；工具链/真机黑天鹅；数据合规；求职与论文的进度冲突。",
+          cons:["无法穷尽，需靠稳健性检验与预案降低冲击"] }
       ] }
   ]
 };
