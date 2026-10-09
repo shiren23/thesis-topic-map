@@ -3,231 +3,404 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>毕业论文选题思路思维导图</title>
+<title>毕业论文选题思路 · 交互树状图</title>
 <style>
   :root{
-    --bg:#eef2f7; --card:#ffffff; --ink:#1f2933; --muted:#64748b;
-    --line:#cbd5e1;
+    --bg:#eef2f7; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --line:#d7dee8;
     --root-bg:#0f172a; --root-ink:#f8fafc;
-    --fact-bg:#e0f2fe; --fact-bd:#0284c7; --fact-ink:#075985;
-    --dec-bg:#f3e8ff;  --dec-bd:#7c3aed;  --dec-ink:#5b21b6;
-    --ok-bg:#dcfce7;   --ok-bd:#16a34a;   --ok-ink:#166534;
-    --no-bg:#f1f5f9;   --no-bd:#94a3b8;   --no-ink:#64748b;
-    --risk-bg:#fff7ed; --risk-bd:#ea580c; --risk-ink:#9a3412;
-    --fin-bg:#ecfeff;  --fin-bd:#0e7490;  --fin-ink:#155e75;
-    --prin-bg:#fefce8; --prin-bd:#ca8a04; --prin-ink:#854d0e;
+    --fact-bg:#e0f2fe; --fact-bd:#38bdf8; --fact-ink:#075985;
+    --prin-bg:#fefce8; --prin-bd:#facc15; --prin-ink:#854d0e;
+    --dec-bg:#f3e8ff;  --dec-bd:#a855f7;  --dec-ink:#5b21b6;
+    --ok-bg:#dcfce7;   --ok-bd:#22c55e;   --ok-ink:#166534;
+    --no-bg:#f1f5f9;   --no-bd:#cbd5e1;   --no-ink:#64748b;
+    --risk-bg:#fff7ed; --risk-bd:#fb923c; --risk-ink:#9a3412;
+    --fin-bg:#ecfeff;  --fin-bd:#06b6d4;  --fin-ink:#155e75;
+    --open-bg:#fdf4ff; --open-bd:#e879f9; --open-ink:#86198f;
   }
   *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{
     margin:0; background:var(--bg); color:var(--ink);
     font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
-    line-height:1.6; padding:32px 18px 80px;
+    display:flex; flex-direction:column; height:100vh; overflow:hidden;
   }
-  .wrap{max-width:1120px; margin:0 auto;}
-  header.top{margin-bottom:26px;}
-  h1{font-size:25px; margin:0 0 6px; letter-spacing:.5px;}
-  .sub{color:var(--muted); font-size:14px;}
-  .path{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:18px 0 8px;}
-  .chip{background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:5px 14px; font-size:13px; font-weight:600;}
-  .chip.go{background:var(--ok-bg); border-color:var(--ok-bd); color:var(--ok-ink);}
-  .arrow{color:var(--no-bd); font-weight:700;}
+  header{
+    padding:14px 22px 12px; background:linear-gradient(135deg,#0f172a,#1e3a5f);
+    color:#e2e8f0; box-shadow:0 2px 12px rgba(15,23,42,.18); z-index:5;
+  }
+  header h1{margin:0; font-size:18px; letter-spacing:.5px; color:#fff;}
+  header .sub{font-size:12.5px; color:#94a3b8; margin-top:3px;}
+  .toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:11px;}
+  .btn{
+    background:rgba(255,255,255,.10); color:#e2e8f0; border:1px solid rgba(255,255,255,.20);
+    border-radius:8px; padding:5px 12px; font-size:12.5px; cursor:pointer; transition:.15s;
+  }
+  .btn:hover{background:rgba(255,255,255,.22);}
+  .hint{margin-left:auto; font-size:12px; color:#94a3b8;}
 
-  .legend{display:flex; flex-wrap:wrap; gap:14px; margin:16px 0 26px; padding:12px 16px;
-          background:#fff; border:1px solid var(--line); border-radius:12px; font-size:12.5px;}
-  .legend span{display:inline-flex; align-items:center; gap:7px; color:#334155;}
-  .dot{width:13px; height:13px; border-radius:4px; border:1.5px solid;}
-  .d-fact{background:var(--fact-bg); border-color:var(--fact-bd);}
-  .d-dec{background:var(--dec-bg); border-color:var(--dec-bd);}
-  .d-ok{background:var(--ok-bg); border-color:var(--ok-bd);}
-  .d-no{background:var(--no-bg); border-color:var(--no-bd);}
-  .d-risk{background:var(--risk-bg); border-color:var(--risk-bd);}
-  .d-fin{background:var(--fin-bg); border-color:var(--fin-bd);}
+  main{flex:1; display:flex; min-height:0;}
+  .viewport{flex:1; position:relative; overflow:hidden; cursor:grab;
+    background-color:#f8fafc;
+    background-image:radial-gradient(var(--line) 1px, transparent 1px);
+    background-size:22px 22px;}
+  .viewport.dragging{cursor:grabbing;}
+  .canvas{position:absolute; top:0; left:0; transform-origin:0 0;}
+  #edges{position:absolute; top:0; left:0; overflow:visible; pointer-events:none;}
 
-  /* ---------- tree ---------- */
-  .tree, .tree ul{list-style:none; margin:0; padding:0;}
-  .tree > li{padding:0;}
-  .tree li{position:relative;}
-  .tree li > ul{
-    margin-left:12px; padding-left:26px;
-    border-left:2px solid var(--line);
-  }
-  .tree li > ul > li{padding:5px 0;}
-  .tree li > ul > li::before{
-    content:""; position:absolute; left:-26px; top:20px;
-    width:22px; height:2px; background:var(--line);
-  }
-  .tree > li > ul > li::before{ top:22px; }
-  .tree li > ul > li:last-child::after{
-    content:""; position:absolute; left:-28px; top:20px; bottom:0;
-    width:10px; background:var(--card);
-  }
   .node{
-    display:inline-block; max-width:760px; padding:7px 13px; border-radius:10px;
-    border:1.6px solid var(--line); background:var(--card); font-size:13.5px;
-    box-shadow:0 1px 3px rgba(15,23,42,.06); vertical-align:top;
+    position:absolute; border-radius:11px; border:1.6px solid var(--line);
+    background:#fff; padding:9px 13px; cursor:pointer; overflow:hidden;
+    box-shadow:0 1px 3px rgba(15,23,42,.08); transition:box-shadow .15s, transform .08s;
+    display:flex; flex-direction:column; justify-content:center;
   }
-  .node small{display:block; font-size:12px; font-weight:400; color:var(--muted); margin-top:3px;}
-  .node .tag{display:inline-block; font-size:11px; font-weight:700; padding:1px 8px; border-radius:999px; margin-left:8px; vertical-align:middle;}
-  .rootnode{background:var(--root-bg); color:var(--root-ink); border-color:var(--root-bg); font-size:15px; font-weight:700; padding:10px 18px;}
-  .fact{background:var(--fact-bg); border-color:var(--fact-bd); color:var(--fact-ink);}
-  .fact small{color:#0c4a6e;}
-  .dec{background:var(--dec-bg); border-color:var(--dec-bd); color:var(--dec-ink); font-weight:700;}
-  .dec small{color:#6d28d9; font-weight:400;}
-  .ok{background:var(--ok-bg); border-color:var(--ok-bd); color:var(--ok-ink); font-weight:600; border-width:2px;}
-  .ok small{color:#15803d; font-weight:400;}
-  .no{background:var(--no-bg); border-color:var(--no-bd); color:var(--no-ink);}
-  .no small{color:#7c8998;}
-  .ok .tag{background:#bbf7d0; color:#166534;}
-  .no .tag{background:#e2e8f0; color:#64748b;}
-  .risk{background:var(--risk-bg); border-color:var(--risk-bd); color:var(--risk-ink);}
-  .risk small{color:#9a3412;}
-  .fin{background:var(--fin-bg); border-color:var(--fin-bd); color:var(--fin-ink); font-weight:700;}
-  .fin small{color:#0e7490; font-weight:400;}
-  .prin{background:var(--prin-bg); border-color:var(--prin-bd); color:var(--prin-ink);}
-  .prin small{color:#854d0e;}
-  .kicker{font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; margin:34px 0 10px; text-transform:uppercase;}
-  footer{margin-top:44px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:12px;}
-  @media print{ body{background:#fff; padding:0;} .node{box-shadow:none;} }
+  .node:hover{box-shadow:0 6px 18px rgba(15,23,42,.18); transform:translateY(-1px);}
+  .node.selected{outline:3px solid #2563eb; outline-offset:1px; box-shadow:0 8px 22px rgba(37,99,235,.28);}
+  .n-label{font-size:13px; font-weight:600; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .n-sub{font-size:11px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .toggle{
+    position:absolute; right:-9px; top:50%; transform:translateY(-50%);
+    width:18px; height:18px; border-radius:50%; border:1.5px solid #cbd5e1; background:#fff;
+    color:#475569; font-size:12px; line-height:1; cursor:pointer; padding:0; z-index:2;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .toggle:hover{background:#2563eb; color:#fff; border-color:#2563eb;}
+
+  .n-root{background:var(--root-bg); border-color:var(--root-bg);}
+  .n-root .n-label{color:var(--root-ink); font-size:14px;}
+  .n-root .n-sub{color:#cbd5e1;}
+  .n-fact{background:var(--fact-bg); border-color:var(--fact-bd);} .n-fact .n-label{color:var(--fact-ink);} .n-fact .n-sub{color:#0c4a6e;}
+  .n-prin{background:var(--prin-bg); border-color:var(--prin-bd);} .n-prin .n-label{color:var(--prin-ink);} .n-prin .n-sub{color:#a16207;}
+  .n-dec{background:var(--dec-bg); border-color:var(--dec-bd);} .n-dec .n-label{color:var(--dec-ink);} .n-dec .n-sub{color:#7e22ce;}
+  .n-ok{background:var(--ok-bg); border-color:var(--ok-bd); border-width:2px;} .n-ok .n-label{color:var(--ok-ink);} .n-ok .n-sub{color:#15803d;}
+  .n-no{background:var(--no-bg); border-color:var(--no-bd);} .n-no .n-label{color:var(--no-ink);} .n-no .n-sub{color:#94a3b8;}
+  .n-risk{background:var(--risk-bg); border-color:var(--risk-bd);} .n-risk .n-label{color:var(--risk-ink);} .n-risk .n-sub{color:#c2410c;}
+  .n-fin{background:var(--fin-bg); border-color:var(--fin-bd);} .n-fin .n-label{color:var(--fin-ink);} .n-fin .n-sub{color:#0e7490;}
+  .n-open{background:var(--open-bg); border-color:var(--open-bd);} .n-open .n-label{color:var(--open-ink);} .n-open .n-sub{color:#a21caf;}
+
+  .panel{
+    width:400px; flex:none; background:var(--panel); border-left:1px solid var(--line);
+    overflow-y:auto; padding:22px 22px 40px;
+  }
+  .panel .empty{color:var(--muted); font-size:13.5px; margin-top:40px; text-align:center; line-height:1.9;}
+  .p-badge{display:inline-block; font-size:11px; font-weight:700; padding:2px 10px; border-radius:999px; letter-spacing:.5px;}
+  .b-root{background:#0f172a; color:#fff;}
+  .b-fact{background:var(--fact-bg); color:var(--fact-ink);}
+  .b-prin{background:var(--prin-bg); color:var(--prin-ink);}
+  .b-dec{background:var(--dec-bg); color:var(--dec-ink);}
+  .b-ok{background:#bbf7d0; color:var(--ok-ink);}
+  .b-no{background:#e2e8f0; color:var(--no-ink);}
+  .b-risk{background:var(--risk-bg); color:var(--risk-ink);}
+  .b-fin{background:var(--fin-bg); color:var(--fin-ink);}
+  .b-open{background:var(--open-bg); color:var(--open-ink);}
+  .panel h2{font-size:18px; margin:12px 0 4px; line-height:1.35;}
+  .p-sub{color:var(--muted); font-size:12.5px; margin:0 0 12px;}
+  .p-desc{font-size:13.5px; line-height:1.75; color:#334155; margin:0 0 16px;}
+  .p-block{border-radius:10px; padding:12px 14px; margin-bottom:12px; font-size:13px; line-height:1.7;}
+  .p-block h4{margin:0 0 7px; font-size:12.5px; letter-spacing:.5px;}
+  .p-block ul{margin:0; padding-left:18px;}
+  .p-block li{margin:3px 0;}
+  .pros{background:#f0fdf4; border:1px solid #bbf7d0;} .pros h4{color:#15803d;}
+  .cons{background:#fef2f2; border:1px solid #fecaca;} .cons h4{color:#b91c1c;}
+  .p-verdict{background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 14px; font-size:13px; line-height:1.7; color:#1e3a8a;}
+  .p-children{margin-top:18px;}
+  .p-children h4{font-size:12px; color:var(--muted); letter-spacing:.5px; margin:0 0 8px;}
+  .chip{display:inline-block; margin:0 6px 6px 0; padding:4px 11px; border-radius:999px; font-size:12px;
+    background:#f1f5f9; border:1px solid var(--line); color:#334155; cursor:pointer; transition:.15s;}
+  .chip:hover{background:#2563eb; color:#fff; border-color:#2563eb;}
+  @media (max-width:820px){
+    main{flex-direction:column;}
+    .panel{width:auto; border-left:none; border-top:1px solid var(--line); max-height:44vh;}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
+<header>
+  <h1>毕业论文选题思路 · 交互树状图</h1>
+  <div class="sub">从竞赛作品到问题研究 · 点击任意节点查看该方案的详细信息与优缺点</div>
+  <div class="toolbar">
+    <button class="btn" id="zoomOut">缩放 −</button>
+    <button class="btn" id="zoomIn">缩放 +</button>
+    <button class="btn" id="fitBtn">适应窗口</button>
+    <button class="btn" id="expandAll">展开全部</button>
+    <button class="btn" id="collapseAll">折叠到二级</button>
+    <span class="hint">拖动平移 · 滚轮缩放 · 点圆点折叠分支 · 点卡片看详情</span>
+  </div>
+</header>
 
-  <header class="top">
-    <h1>毕业论文选题思路思维导图</h1>
-    <div class="sub">从竞赛作品到问题研究 · 决策路径、取舍与最终选择</div>
-
-    <div class="path">
-      <span class="chip">起点：悟空杯 QML 回归</span><span class="arrow">→</span>
-      <span class="chip">锚点：<b>B 长尾/分布感知</b></span><span class="arrow">→</span>
-      <span class="chip go">方案：<b>B2 迁移 + 量子侧缓解</b></span>
+<main>
+  <div class="viewport" id="viewport">
+    <div class="canvas" id="canvas">
+      <svg id="edges"></svg>
+      <div id="nodes"></div>
     </div>
+  </div>
+  <aside class="panel" id="panel">
+    <div class="empty">点左侧任意节点<br>查看该方案的详细说明、优点与缺点</div>
+  </aside>
+</main>
 
-    <div class="legend">
-      <span><i class="dot d-fact"></i>事实 / 素材</span>
-      <span><i class="dot d-dec"></i>决策节点</span>
-      <span><i class="dot d-ok"></i>✓ 选定</span>
-      <span><i class="dot d-no"></i>未选（附原因）</span>
-      <span><i class="dot d-risk"></i>风险 / 取舍</span>
-      <span><i class="dot d-fin"></i>最终设计</span>
-    </div>
-  </header>
+<script>
+/* ============ 数据：整棵决策树 ============ */
+const DATA = {
+  id:"root", type:"root", label:"毕业论文选题构思", sub:"从竞赛作品到问题研究",
+  desc:"从悟空杯竞赛作品出发，经过两级关键决策（① 创新锚点 → ② B 内部方案），最终收敛到 B2。点击任意节点查看该方案的说明、优点、缺点/风险与取舍结论。",
+  children:[
+    { id:"s1", type:"fact", label:"一、素材与起点", sub:"现有原料 + 一个关键现象",
+      desc:"可复用的素材，以及优秀答案暴露出的一个可研究现象。",
+      children:[
+        { id:"s1a", type:"fact", label:"竞赛题：保险费用预测", sub:"回归任务 · 悟空杯第二题",
+          desc:"CIC“悟空杯”量子计算大赛 2025 第二题：用混合量子-经典模型预测医疗保险费用 charges。约束：经典参数 < 20（仅一层 FC）、量子参数 < 200。",
+          pros:["有公开数据与清晰评测指标（RMSE）","有同行优秀答案可对标","问题边界清晰、可复现"],
+          cons:["数据集很小（训练 1070 / 测试 268）","天然容易写成“调参工程报告”"] },
+        { id:"s1b", type:"fact", label:"我的实现：RMSE≈9006", sub:"已有可运行代码",
+          desc:"基于 pyvqnet 的混合模型：角度编码 + 变分线路 + 线性输出；RMSE ≈ 9006 / 8877。",
+          pros:["全流程已跑通，复现环境齐备","作为论文的代码起点"],
+          cons:["显著落后优秀答案，说明特征工程/训练策略有差距"] },
+        { id:"s1c", type:"fact", label:"优秀答案：RMSE 4344", sub:"观星量仔队 · 分桶",
+          desc:"优秀答案最终 RMSE 4343.87。关键改进是“按 charges 分成 >10000 / ≤10000 两个子集，各训练一个模型”（分桶）。",
+          pros:["提供强 baseline","暴露一个真实、可复现、可解释的“关键现象”"],
+          cons:["分桶是启发式技巧，论文里缺乏机理解释"] },
+        { id:"s1d", type:"fact", label:"选题示例：氟骨症影像", sub:"三段式结构可借鉴",
+          desc:"实验室示例选题：长尾表征学习 + 等级(序)关系 + 预测可靠性，三段式。",
+          pros:["结构可整体迁移到 QML 场景","其“长尾”主题与分桶现象高度契合"],
+          cons:["属医学影像方向，与 QML 场景不同，只借结构不借内容"] },
+        { id:"s1e", type:"risk", label:"关键现象：长尾→尾部失效", sub:"论文的立题之本",
+          desc:"charges 呈明显右偏（长尾）；高费用尾部预测误差显著大于中低值区间；分桶能缓解但缺乏解释。",
+          pros:["真实、可复现、可解释 —— 是“问题研究”的最佳种子","能引出竞争性假设与控制变量实验"],
+          cons:["必须用假设检验验证，否则只是技巧陈述"] }
+      ] },
+    { id:"s2", type:"prin", label:"二、总原则（约束）", sub:"本科毕业论文的验收逻辑",
+      desc:"选题必须服从本科毕业论文的定位：综合性训练、重过程规范、结论有边界。",
+      children:[
+        { id:"s2a", type:"prin", label:"问题研究 ≠ 工程报告",
+          desc:"论文要回答“为什么 / 在什么条件下”，而不是“我做了什么、指标多少”。",
+          pros:["符合本科论文“综合性训练”定位","允许模型输给经典方法，只要能解释"] },
+        { id:"s2b", type:"prin", label:"结论须有边界、不夸大",
+          desc:"优秀论文要求：立论正确、实验严密、结论合理，明确结论在什么条件下成立。",
+          pros:["显著降低“结论不成立”的风险"] },
+        { id:"s2c", type:"prin", label:"必须保留经典 ML 对照",
+          desc:"任何量子方法的增益都必须有同数据、同设置的经典 ML 基线对照。",
+          pros:["否则无法归因“增益来自量子还是来自目标处理”"],
+          cons:["增加约一组实验的工作量"] },
+        { id:"s2d", type:"prin", label:"数据偏小 → 需扩充",
+          desc:"竞赛数据规模不足以支撑统计显著性，需补充公开数据集与合成数据。",
+          pros:["提升实验厚度与结论稳健性"],
+          cons:["需要额外收集数据、构造可控长尾版本"] }
+      ] },
+    { id:"d1", type:"dec", label:"三、决策一：锚点在哪一层？", sub:"创新点落在哪 · 四选一",
+      desc:"这是最关键的岔路：论文的“研究问题”核心落在量子层、数据分布层、评估层，还是三者综合。",
+      children:[
+        { id:"A", type:"no", label:"A · 量子编码 / 线路层", sub:"未选",
+          desc:"研究不同量子特征编码（角度 / 数据重上传 / 振幅）与线路结构，对模型表达力、可训练性与泛化的影响。",
+          pros:["量子含量高，贴合 2026 赛题“高效量子编码”","结论形式天然是“在 X 条件下……”","可测过程指标（梯度方差、收敛速度）"],
+          cons:["容易滑向“编码方式大比拼”的工程对比","研究问题较难做深，需靠过程指标撑"],
+          verdict:"未选为主锚点，但作为 B2 的配套章节保留。" },
+        { id:"B", type:"ok", label:"B · 长尾 / 分布感知层", sub:"✓ 选定",
+          desc:"研究右偏/长尾目标分布下，混合 QML 为何在尾部系统性失效，及其缓解方法。",
+          pros:["研究问题最实、机理可挖","控制变量 + 假设检验结构清晰","最贴示例选题的“长尾”主题","天然避开工程报告陷阱"],
+          cons:["风险：量子易成“装饰”，必须专门设计量子侧机制"],
+          verdict:"选定为核心锚点。" },
+        { id:"C", type:"no", label:"C · 不确定性 / 可靠性层", sub:"未选",
+          desc:"研究混合 QML 回归的预测不确定性与校准（集成 / MC-dropout / 分位数 / 共形预测）。",
+          pros:["相对冷门、易出结论、工作量轻","可作 B2 最后一章“可靠性”"],
+          cons:["量子成分弱，导师若重量子创新则不宜"],
+          verdict:"未选为主锚点，视导师要求决定是否作为补充章节。" },
+        { id:"D", type:"no", label:"D · 三段式综合", sub:"未选",
+          desc:"编码层 → 长尾感知层 → 可靠性评估，完整对齐示例选题结构。",
+          pros:["结构最漂亮、最像“优秀论文”"],
+          cons:["工作量最大","每章深度被摊薄，易面面俱到而不深"],
+          verdict:"未选，改为以 B 为主干、A/C 作配套。" },
+        { id:"D1sum", type:"ok", label:"✔ 结论：选 B", sub:"A / C 作配套章节",
+          desc:"以“长尾/分布感知”为论文的研究问题核心；把量子编码(A)与可靠性(C)作为配套章节补入，兼顾量子含量与结构完整。",
+          verdict:"决策一完成 → 进入决策二。" }
+      ] },
+    { id:"d2", type:"dec", label:"四、决策二：B 内部怎么做？", sub:"量子含量递进 · 三选一",
+      desc:"确定长尾方向后，还要决定论文里“量子”承担多少 —— 是只做经典方法迁移，还是必须有量子侧机制。",
+      children:[
+        { id:"B1", type:"no", label:"B1 · 纯迁移研究", sub:"未选",
+          desc:"把经典不平衡回归方法（重加权 / LDS / FDS / 两阶段 / 分位数）逐一迁移到 QML 骨干上评测。",
+          pros:["最稳、最易完成、结论明确"],
+          cons:["量子创新弱（量子只是骨干）"],
+          verdict:"未选：不够“量子”。" },
+        { id:"B2", type:"ok", label:"B2 · 迁移 + 量子侧缓解", sub:"✓ 选定",
+          desc:"在经典迁移评测之外，设计并实现至少一个量子侧机制：加权读出 / 量子门控混合 / 量子分位数。核心创新=用量子门控条件模型替代“分桶”。",
+          pros:["真问题 + 真量子创新","工作量对本科可控","形成“机理→迁移→缓解”完整链条","量子门控可检验参数效率"],
+          cons:["需要实现并调通量子门控，有实现/收敛风险"],
+          verdict:"选定。" },
+        { id:"B3", type:"no", label:"B3 · 量子门控为唯一主线", sub:"未选",
+          desc:"只做量子专家混合 / 条件 VQC，深入研究门控机制与参数效率。",
+          pros:["最聚焦、最有亮点，可能出彩"],
+          cons:["本科难度与风险最高，缺乏回退空间"],
+          verdict:"未选：风险过高。" }
+      ] },
+    { id:"f", type:"fin", label:"五、最终设计（B2）", sub:"题目 · 问题 · 内容 · 实验 · 创新",
+      desc:"B2 的完整选题设计，详见仓库 docs/选题设计-B2.md。",
+      children:[
+        { id:"f1", type:"fin", label:"题目", sub:"长尾目标下量子-经典混合回归…",
+          desc:"《长尾目标下量子-经典混合回归的失效机理与分布感知缓解方法研究》。备选：《面向不平衡回归的量子-经典混合模型：失效机理、方法迁移与量子侧缓解》。" },
+        { id:"f2", type:"fin", label:"研究问题", sub:"三问",
+          desc:"论文要回答的三个问题。",
+          children:[
+            { id:"f2a", type:"fin", label:"① 尾部失效的机理", desc:"混合 QML 在长尾回归上的尾部失效，主要由 MSE 主导、尾部稀缺、编码饱和还是条件分布异质造成？" },
+            { id:"f2b", type:"fin", label:"② 经典方法的迁移性", desc:"经典不平衡回归方法（重加权 / LDS / FDS / 两阶段 / 分位数）迁移到混合 QML 后是否仍有效？为什么？" },
+            { id:"f2c", type:"fin", label:"③ 更少参数的量子门控", desc:"能否用参数更少、端到端训练的量子条件（门控）模型替代优秀答案的“分桶”？" }
+          ] },
+        { id:"f3", type:"fin", label:"研究内容", sub:"三段式",
+          desc:"对齐示例选题的三段式结构。",
+          children:[
+            { id:"f3a", type:"fin", label:"① 失效机理诊断", sub:"H1/H2/H3", desc:"用竞争性假设 H1(MSE 主导) / H2(尾部稀缺) / H3(分桶=条件建模) 逐一检验，建立分组误差诊断体系。" },
+            { id:"f3b", type:"fin", label:"② 方法迁移评测", desc:"把重加权 / LDS / FDS / 两阶段 / 分位数迁移到同一 QML 骨干，评测成效与边界，回答“分桶是否为其特例”。" },
+            { id:"f3c", type:"fin", label:"③ 量子侧缓解", desc:"实现 (a) 加权读出、(b) 量子门控/条件混合、(c) 量子分位数，与经典机制和分桶公平对照。" },
+            { id:"f3d", type:"open", label:"④（可选）可靠性评估", sub:"待定", desc:"把分位数做成预测区间，报告覆盖率/校准。是否保留待与导师确认。" }
+          ] },
+        { id:"f4", type:"fin", label:"实验矩阵", sub:"六条轴", desc:"统一实验协议：每设置多随机种子重复，报告均值±方差。",
+          children:[
+            { id:"f4a", type:"fact", label:"数据", desc:"保险集 + 2–3 个公开回归集（Concrete / Energy / Yacht）+ 合成可控长尾版本。" },
+            { id:"f4b", type:"fact", label:"目标处理", desc:"全局 / 分桶(优秀答案) / 重加权 / LDS / FDS / 两阶段 / 分位数。" },
+            { id:"f4c", type:"fact", label:"对照", desc:"经典 MLP + 相同目标处理（必需）。" },
+            { id:"f4d", type:"fact", label:"指标", desc:"总 RMSE + 分组 RMSE（≤10k / 10k–15k / >15k）+ 尾部条件偏差 + 参数量。" },
+            { id:"f4e", type:"fact", label:"边界", desc:"样本量 {100,300,856} × 长尾比例 × 比特数 {4,6,8} × 噪声 {理想/加噪/真机}。" },
+            { id:"f4f", type:"fact", label:"消融", desc:"门控专家数；编码方式（角度 vs 数据重上传）在长尾下的差异。" }
+          ] },
+        { id:"f5", type:"fin", label:"预期结论与边界", desc:"失效主因＝条件分布异质 + MSE 主导；量子门控以更少参数接近/超越分桶；样本量大或尾部比例高时各方法差距收敛。" },
+        { id:"f6", type:"fin", label:"创新点", desc:"① 首次研究不平衡回归向混合 QML 的迁移性；② 量子门控/条件混合回归替代分桶；③ 尾部失效机理的实证分解与适用边界。" },
+        { id:"f7", type:"risk", label:"风险与对策", desc:"三类风险各有回退方案。",
+          children:[
+            { id:"f7a", type:"risk", label:"门控不收敛", sub:"→ 回退加权读出", desc:"若量子门控实现/训练失败，回退到“加权读出”，论文主线仍成立。" },
+            { id:"f7b", type:"risk", label:"迁移无效", sub:"→ 负结果也有价值", desc:"经典方法若在 QML 上无效，负结果本身即结论，如实报告并分析原因。" },
+            { id:"f7c", type:"risk", label:"数据太小", sub:"→ 扩充", desc:"公开数据集 + 合成长尾 + 交叉验证补足统计显著性。" }
+          ] }
+      ] },
+    { id:"o", type:"dec", label:"六、待定 / 开放问题", sub:"需进一步确认",
+      desc:"尚未拍板、需要与导师或自行确认的事项。",
+      children:[
+        { id:"o1", type:"open", label:"是否保留“可靠性”章节", desc:"对应决策一中的 C 方向，是否作为 B2 的最后一章。" },
+        { id:"o2", type:"open", label:"需确认的约束", desc:"算力 / 本源真机、可支配时间、导师对“量子创新”的要求强度。" },
+        { id:"o3", type:"open", label:"数据集扩充清单", desc:"Concrete / Energy / Yacht 等公开表格回归集的具体选择。" }
+      ] }
+  ]
+};
 
-  <div class="kicker">决策树</div>
-  <ul class="tree">
-    <li>
-      <span class="node rootnode">毕业论文选题构思</span>
-      <ul>
+/* ============ 布局参数 ============ */
+const NODE_W=250, NODE_H=58, GAP_X=92, GAP_Y=14, PAD=48;
+const TYPE_LABEL={root:"总览",fact:"素材 / 事实",prin:"原则",dec:"决策",ok:"✓ 选定",no:"未选",risk:"风险",fin:"最终设计",open:"待定"};
+const TYPE_CLASS={root:"b-root",fact:"b-fact",prin:"b-prin",dec:"b-dec",ok:"b-ok",no:"b-no",risk:"b-risk",fin:"b-fin",open:"b-open"};
 
-        <!-- 1. 素材 -->
-        <li>
-          <span class="node fact">一、素材与起点</span>
-          <ul>
-            <li><span class="node fact">竞赛题：基于量子机器学习的<b>医疗保险费用预测</b>（回归任务）</span></li>
-            <li><span class="node fact">我的实现：RMSE ≈ 9006 / 8878（远逊于优秀答案）</span></li>
-            <li><span class="node fact">优秀答案（观星量仔队）：RMSE 4344<br><small>关键改进 = 按 charges 分成 &gt;10000 / ≤10000 各训一个模型（"分桶"）</small></span></li>
-            <li><span class="node fact">选题示例：氟骨症 X 线影像分级<br><small>提供可借鉴的"三段式"结构：表征学习 → 长尾/等级 → 可靠性评估</small></span></li>
-            <li><span class="node risk">🌱 论文的种子（关键现象）<br><small>charges 右偏/长尾 → 高费用尾部<b>系统性失效</b>；分桶有效但<b>缺乏机理解释</b></small></span></li>
-          </ul>
-        </li>
+const canvas=document.getElementById("canvas");
+const nodesLayer=document.getElementById("nodes");
+const svg=document.getElementById("edges");
+const viewport=document.getElementById("viewport");
+const panel=document.getElementById("panel");
 
-        <!-- 2. 原则 -->
-        <li>
-          <span class="node prin">二、总原则（约束）</span>
-          <ul>
-            <li><span class="node prin">问题研究 ≠ 工程报告：要有可回答的研究问题与机理</span></li>
-            <li><span class="node prin">结论必须有<b>边界</b>、不夸大；允许输给经典方法</span></li>
-            <li><span class="node prin">必须保留<b>经典 ML 对照</b>，否则说服力不足</span></li>
-            <li><span class="node prin">数据偏小 → 需扩充公开数据集 + 合成长尾 + 交叉验证</span></li>
-          </ul>
-        </li>
+let scale=1, panX=24, panY=24;
+let selected=null;
+let canvasW=0, canvasH=0;
 
-        <!-- 3. 决策一 -->
-        <li>
-          <span class="node dec">三、决策一：创新锚点落在哪一层？</span>
-          <ul>
-            <li><span class="node no">A · 量子编码 / 线路层<span class="tag">未选</span><br><small>取舍：量子含量强、贴合 2026 赛题；但易滑向工程对比，研究问题难做深</small></span></li>
-            <li><span class="node ok">B · 长尾 / 分布感知层<span class="tag">✓ 选定</span><br><small>取舍：研究问题最实、机理可挖、天然贴示例选题；<b>风险 = 量子易成"装饰"</b>（需专门设计量子侧机制）</small></span></li>
-            <li><span class="node no">C · 不确定性 / 可靠性层<span class="tag">未选</span><br><small>取舍：最易出结论、工作量轻；但量子成分弱，导师若重量子创新则不宜</small></span></li>
-            <li><span class="node no">D · 三段式综合<span class="tag">未选</span><br><small>取舍：结构最漂亮、最像"优秀论文"；但工作量最大、易面面俱到而不深</small></span></li>
-            <li><span class="node ok">结论：选 B；把 A（编码）与 C（可靠性）作为<b>配套章节</b>补入</span></li>
-          </ul>
-        </li>
+/* ============ 布局 ============ */
+function layout(){
+  let cursor=PAD, maxDepth=0;
+  (function walk(n,depth){
+    n._depth=depth; maxDepth=Math.max(maxDepth,depth);
+    const kids=n.collapsed?[]:(n.children||[]);
+    if(kids.length===0){ n._y=cursor; cursor+=NODE_H+GAP_Y; }
+    else{ kids.forEach(k=>walk(k,depth+1)); n._y=(kids[0]._y+kids[kids.length-1]._y)/2; }
+    n._x=PAD+depth*(NODE_W+GAP_X);
+  })(DATA,0);
+  canvasW=PAD*2+(maxDepth+1)*NODE_W+maxDepth*GAP_X;
+  canvasH=cursor-GAP_Y+PAD;
+  canvas.style.width=canvasW+"px"; canvas.style.height=canvasH+"px";
+  svg.setAttribute("width",canvasW); svg.setAttribute("height",canvasH);
+}
 
-        <!-- 4. 决策二 -->
-        <li>
-          <span class="node dec">四、决策二：B 内部怎么做？</span>
-          <ul>
-            <li><span class="node no">B1 · 纯迁移研究<span class="tag">未选</span><br><small>取舍：最稳、最易完成；但量子创新弱（量子只是骨干）</small></span></li>
-            <li><span class="node ok">B2 · 迁移 + 量子侧缓解<span class="tag">✓ 选定</span><br><small>取舍：真问题 + 真量子创新、工作量可控；代价 = 需实现并调通<b>量子门控</b></small></span></li>
-            <li><span class="node no">B3 · 量子门控为唯一主线<span class="tag">未选</span><br><small>取舍：最聚焦、最有亮点；但本科难度与风险最高</small></span></li>
-          </ul>
-        </li>
+/* ============ 渲染 ============ */
+function render(){
+  layout();
+  nodesLayer.innerHTML="";
+  const paths=[];
+  (function walk(n){
+    const el=document.createElement("div");
+    el.className="node n-"+n.type+(n===selected?" selected":"");
+    el.style.left=n._x+"px"; el.style.top=n._y+"px";
+    el.style.width=NODE_W+"px"; el.style.height=NODE_H+"px";
+    el.innerHTML='<div class="n-label"></div>'+(n.sub?'<div class="n-sub"></div>':'');
+    el.querySelector(".n-label").textContent=n.label;
+    if(n.sub) el.querySelector(".n-sub").textContent=n.sub;
+    el.addEventListener("click",e=>{e.stopPropagation(); select(n);});
+    const kids=n.collapsed?[]:(n.children||[]);
+    if((n.children||[]).length>0){
+      const t=document.createElement("button");
+      t.className="toggle"; t.textContent=n.collapsed?"+":"−";
+      t.title=n.collapsed?"展开分支":"折叠分支";
+      t.addEventListener("click",e=>{e.stopPropagation(); n.collapsed=!n.collapsed; render();});
+      el.appendChild(t);
+    }
+    nodesLayer.appendChild(el);
+    kids.forEach(c=>{
+      const px=n._x+NODE_W, py=n._y+NODE_H/2, cx=c._x, cy=c._y+NODE_H/2, mx=(px+cx)/2;
+      paths.push('<path d="M '+px+' '+py+' C '+mx+' '+py+', '+mx+' '+cy+', '+cx+' '+cy+'" style="fill:none;stroke:'+edgeColor(c)+';stroke-width:1.6;"/>');
+      walk(c);
+    });
+  })(DATA);
+  svg.innerHTML=paths.join("");
+}
+function edgeColor(n){
+  const m={ok:"#22c55e",no:"#cbd5e1",fact:"#7dd3fc",prin:"#fde047",dec:"#d8b4fe",risk:"#fdba74",fin:"#67e8f9",open:"#f5d0fe",root:"#94a3b8"};
+  return m[n.type]||"#cbd5e1";
+}
 
-        <!-- 5. 最终设计 -->
-        <li>
-          <span class="node fin">五、最终设计（B2）</span>
-          <ul>
-            <li><span class="node fin">题目：长尾目标下量子-经典混合回归的失效机理与分布感知缓解方法研究</span></li>
-            <li>
-              <span class="node fin">研究问题</span>
-              <ul>
-                <li><span class="node fin">① 尾部失效的<b>机理</b>是什么？</span></li>
-                <li><span class="node fin">② 经典<b>不平衡回归方法</b>能否迁移到混合 QML？</span></li>
-                <li><span class="node fin">③ 能否用<b>参数更少</b>的量子门控模型替代"分桶"？</span></li>
-              </ul>
-            </li>
-            <li>
-              <span class="node fin">研究内容（三段式）</span>
-              <ul>
-                <li><span class="node fin">① 失效机理诊断：竞争假设 H1( MSE 主导 ) / H2( 尾部稀缺 ) / H3( 分桶=条件建模 )</span></li>
-                <li><span class="node fin">② 方法迁移评测：重加权 / LDS·FDS / 两阶段 / 分位数</span></li>
-                <li><span class="node fin">③ 量子侧缓解：(a) 加权读出 · (b) <b>量子门控混合</b> · (c) 量子分位数</span></li>
-                <li><span class="node no">④（可选）尾部可靠性评估<span class="tag">待定</span><br><small>是否保留，需与导师确认</small></span></li>
-              </ul>
-            </li>
-            <li>
-              <span class="node fin">实验矩阵</span>
-              <ul>
-                <li><span class="node fact">数据：保险集 + 2–3 公开回归集 + 合成可控长尾</span></li>
-                <li><span class="node fact">目标处理：全局 / 分桶 / 重加权 / LDS / FDS / 两阶段 / 分位数</span></li>
-                <li><span class="node fact">对照：经典 MLP + 相同目标处理（必需）</span></li>
-                <li><span class="node fact">指标：总 RMSE + <b>分组 RMSE（≤10k / 10k–15k / &gt;15k）</b> + 尾部偏差 + 参数量</span></li>
-                <li><span class="node fact">边界：样本量 × 长尾比例 × 比特数 × 噪声</span></li>
-                <li><span class="node fact">消融：门控专家数、编码方式在长尾下的差异</span></li>
-              </ul>
-            </li>
-            <li><span class="node fin">预期结论：失效主因＝条件分布异质 + MSE 主导；量子门控以更少参数接近/超越分桶；样本量大或尾部比例高时差距收敛</span></li>
-            <li><span class="node fin">创新点：① 不平衡回归向混合 QML 的迁移性研究 ② 量子门控/条件混合回归 ③ 失效机理的实证分解与边界</span></li>
-            <li>
-              <span class="node risk">风险与对策</span>
-              <ul>
-                <li><span class="node risk">门控不收敛 → 回退"加权读出"，主线仍成立</span></li>
-                <li><span class="node risk">迁移无效 → <b>负结果本身有价值</b>，如实报告</span></li>
-                <li><span class="node risk">数据太小 → 公开集 + 合成 + 交叉验证</span></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
+/* ============ 详情面板 ============ */
+function select(n){
+  selected=n; render();
+  const badge=TYPE_LABEL[n.type]||"", bc=TYPE_CLASS[n.type]||"";
+  let html='<span class="p-badge '+bc+'">'+badge+"</span>";
+  html+="<h2></h2>";
+  if(n.sub) html+='<p class="p-sub"></p>';
+  if(n.desc) html+='<p class="p-desc"></p>';
+  if(n.pros&&n.pros.length) html+='<div class="p-block pros"><h4>✓ 优点</h4><ul></ul></div>';
+  if(n.cons&&n.cons.length) html+='<div class="p-block cons"><h4>✗ 缺点 / 风险</h4><ul></ul></div>';
+  if(n.verdict) html+='<div class="p-verdict"><b>取舍结论：</b><span></span></div>';
+  if(n.children&&n.children.length) html+='<div class="p-children"><h4>下级节点（点击跳转）</h4></div>';
+  panel.innerHTML=html;
+  panel.querySelector("h2").textContent=n.label;
+  if(n.sub) panel.querySelector(".p-sub").textContent=n.sub;
+  if(n.desc) panel.querySelector(".p-desc").textContent=n.desc;
+  if(n.pros&&n.pros.length){const ul=panel.querySelector(".pros ul"); n.pros.forEach(x=>{const li=document.createElement("li"); li.textContent=x; ul.appendChild(li);});}
+  if(n.cons&&n.cons.length){const ul=panel.querySelector(".cons ul"); n.cons.forEach(x=>{const li=document.createElement("li"); li.textContent=x; ul.appendChild(li);});}
+  if(n.verdict) panel.querySelector(".p-verdict span").textContent=n.verdict;
+  if(n.children&&n.children.length){
+    const box=panel.querySelector(".p-children");
+    n.children.forEach(c=>{const s=document.createElement("span"); s.className="chip"; s.textContent=c.label; s.addEventListener("click",()=>{c.collapsed=false; select(c);}); box.appendChild(s);});
+  }
+}
 
-        <!-- 6. 开放问题 -->
-        <li>
-          <span class="node dec">六、待定 / 开放问题</span>
-          <ul>
-            <li><span class="node no">是否保留"可靠性"章节<span class="tag">待定</span></span></li>
-            <li><span class="node no">需确认：算力 / 本源真机 · 可支配时间 · 导师对量子创新的要求强度<span class="tag">待定</span></span></li>
-            <li><span class="node no">数据集扩充清单（Concrete / Energy / Yacht …）<span class="tag">待定</span></span></li>
-          </ul>
-        </li>
+/* ============ 平移 / 缩放 ============ */
+function applyTransform(){ canvas.style.transform="translate("+panX+"px,"+panY+"px) scale("+scale+")"; }
+function zoomAt(mx,my,factor){
+  const ns=Math.min(2.6,Math.max(0.18,scale*factor));
+  panX=mx-(mx-panX)*(ns/scale); panY=my-(my-panY)*(ns/scale); scale=ns; applyTransform();
+}
+function fit(){
+  const vw=viewport.clientWidth, vh=viewport.clientHeight;
+  scale=Math.min(vw/canvasW, vh/canvasH, 1.15);
+  scale=Math.max(0.18,scale*0.94);
+  panX=(vw-canvasW*scale)/2; panY=(vh-canvasH*scale)/2; applyTransform();
+}
+viewport.addEventListener("wheel",e=>{e.preventDefault(); const r=viewport.getBoundingClientRect(); zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*0.0015));},{passive:false});
+let drag=null;
+viewport.addEventListener("mousedown",e=>{ if(e.target.closest(".node")||e.target.closest(".toggle")) return; drag={x:e.clientX,y:e.clientY,px:panX,py:panY}; viewport.classList.add("dragging"); });
+window.addEventListener("mousemove",e=>{ if(!drag) return; panX=drag.px+(e.clientX-drag.x); panY=drag.py+(e.clientY-drag.y); applyTransform(); });
+window.addEventListener("mouseup",()=>{ drag=null; viewport.classList.remove("dragging"); });
 
-      </ul>
-    </li>
-  </ul>
+document.getElementById("zoomIn").onclick=()=>zoomAt(viewport.clientWidth/2,viewport.clientHeight/2,1.2);
+document.getElementById("zoomOut").onclick=()=>zoomAt(viewport.clientWidth/2,viewport.clientHeight/2,1/1.2);
+document.getElementById("fitBtn").onclick=fit;
+document.getElementById("expandAll").onclick=()=>{(function w(n){n.collapsed=false;(n.children||[]).forEach(w);})(DATA); render();};
+document.getElementById("collapseAll").onclick=()=>{(function w(n){n.collapsed=(n._depth||0)>=2;(n.children||[]).forEach(w);})(DATA); render(); fit();};
 
-  <footer>
-    生成日期：2026-10-09 · 对应仓库文档 <code>docs/选题设计-B2.md</code> ·
-    绿色＝选定路径，灰色＝未选方案及其取舍，橙色＝风险/关键现象。
-  </footer>
-</div>
+/* ============ 初始化 ============ */
+render();
+select(DATA);
+if(canvasH>viewport.clientHeight*0.9||canvasW>viewport.clientWidth*0.9){ fit(); }
+</script>
 </body>
 </html>
